@@ -15,16 +15,16 @@ const extractProductData = async (url,browser) => {
 
         /********** A RELLENAR todos los page.$eval(selector, function)  *********/
         //titulo
-        //productData['name'] = await page.$eval(selector, function)
+        productData['name'] = await page.$eval('.productTitle', title=>title.innerText)
         //precio
-        //productData['price'] = await page.$eval(selector, function)
+        productData['price'] = await page.$eval('#normalpricenumber', price=>price.innerText)
         //imagenes
-        //productData['img'] = await page.$eval(selector, function)
+        productData['img'] = await page.$eval('#productmainimageitem', img=>img['src'])
         //info
-        //productData['info'] = await page.$eval(selector, function)
+        productData['info'] = await page.$eval('.productextrainfo',info=>info.innerText)
         //descripción
-        //productData['description'] = await page.$eval(selector, description=>description.innerText.slice(0,200) + '...')
-        
+        productData['description'] = await page.$eval('.productdetailinfocontainer', description=>description.innerText.slice(0,200) + '...')
+
         return productData // Devuelve los datos de un producto
     }
     catch(err){
@@ -55,7 +55,8 @@ const scrap = async (url) => {
         // En este caso , en el CB filtramos el array de items, guardando en un nuevo array
 
         /********** A RELLENAR page.$eval(selector, function)  *********/
-        //const tmpurls = await page.$$eval(selector,funcion)
+        
+        const tmpurls = await page.$$eval('.productflex div div div.d-table-cell a',data=>data.map(product=>product.href))
         
         //Quitamos los duplicados
         const urls = await tmpurls.filter((link,index) =>{ return tmpurls.indexOf(link) === index})
@@ -69,7 +70,7 @@ const scrap = async (url) => {
         // await extractProductData(urls2[productLink],browser)
 
         console.log(`${urls2.length} links encontrados`);
-
+        
         // Iteramos el array de urls con un bucle for/in y ejecutamos la promesa extractProductData por cada link en el array. Luego pusheamos el resultado a scraped data
         for(productLink in urls2){
             const product = await extractProductData(urls2[productLink],browser)
@@ -77,6 +78,7 @@ const scrap = async (url) => {
         }
         
         console.log(scrapedData, "Lo que devuelve mi función scraper", scrapedData.length) 
+        
        
         // cerramos el browser con el método browser.close
         await browser.close()
